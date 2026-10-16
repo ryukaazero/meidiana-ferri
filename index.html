@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리의 결혼 — DIAN &amp; FERRI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;400;700&family=Gowun+Batang&family=Parisienne&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink: #d4728f;
+  --blush: #fce4ec;
+  --cream: #fdf9f6;
+  --ink: #4a3b3b;
+  --gold: #c9a86a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Gowun Batang', serif;
+  background:var(--cream);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+body.locked { overflow:hidden; }
+
+@keyframes softPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(212,114,143,.35); }
+  50%     { box-shadow:0 0 0 8px rgba(212,114,143,0); }
+}
+
+/* ═══════════ SAKURA FALLING ═══════════ */
+canvas#petals {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:50;
+}
+
+/* ═══════════ ENVELOPE + GATE COVER ═══════════ */
+#cover {
+  position:fixed; inset:0; z-index:100;
+  background:radial-gradient(ellipse at center,#fdf3ee 0%,#f7e3e8 100%);
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity 1s ease .9s;
+}
+#cover.open { opacity:0; pointer-events:none; }
+
+/* ── gerbang ── */
+.gate { position:absolute; inset:0; display:flex; pointer-events:none; z-index:1; }
+.gate-door {
+  flex:1;
+  background:linear-gradient(160deg,#fdeef3 0%,#f8dbe4 45%,#f3cbd8 100%);
+  position:relative;
+  transition:transform 1.6s cubic-bezier(.77,0,.18,1);
+  box-shadow:inset 0 0 80px rgba(212,114,143,.18);
+}
+.gate-door.left  { border-right:1px solid rgba(201,107,139,.25); transform-origin:left; }
+.gate-door.right { border-left:1px solid rgba(201,107,139,.25); transform-origin:right; }
+.door-ornament {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-size:4.5rem; color:rgba(201,107,139,.28);
+  transition:opacity .8s ease;
+}
+#cover.gate-open .gate-door.left  { transform:translateX(-100%); }
+#cover.gate-open .gate-door.right { transform:translateX(100%); }
+#cover.gate-open .door-ornament { opacity:0; }
+
+/* ── panggung amplop ── */
+.env-stage { position:relative; z-index:2; text-align:center; perspective:1200px; }
+.env-hint {
+  margin-top:34px; color:#b0938d; font-size:.8rem; letter-spacing:3px;
+  text-transform:uppercase; animation:hintPulse 2.2s ease-in-out infinite;
+}
+@keyframes hintPulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* ── amplop ── */
+.envelope {
+  position:relative; width:300px; height:200px; margin:0 auto;
+  cursor:pointer;
+  animation:envFloat 4s ease-in-out infinite;
+  transition:transform .6s ease, opacity .8s ease;
+  transform-style:preserve-3d; /* 💡 WAJIB ADA: Agar elemen anak bisa berputar secara 3D */
+  perspective: 800px; /* Tambahan perspektif internal agar rotasi melengkung nyata */
+}
+@keyframes envFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+/* kartu di dalam */
+.env-card {
+  position:absolute; inset:12px; z-index:1;
+  background:linear-gradient(150deg,#fffdf8,#fdf1ef);
+  border:1px solid #f0d5dd; border-radius:8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:0 8px 24px rgba(212,114,143,.18);
+  opacity:0; transform:translateY(30px) scale(.9);
+  transition:all .9s cubic-bezier(.2,.8,.3,1.1) .5s;
+}
+.ec-hangul { font-family:'Noto Serif KR',serif; color:#c9a3ad; letter-spacing:6px; font-size:.75rem; }
+.env-card h3 { font-family:'Parisienne',cursive; font-size:1.9rem; color:var(--ink); margin:6px 0 4px; }
+.ec-date { color:var(--pink); font-size:.8rem; letter-spacing:4px; }
+
+/* badan amplop */
+.env-back {
+  position:absolute; inset:0; z-index:0;
+  background:linear-gradient(150deg,#fbe4ea,#f6d3dd);
+  border-radius:10px;
+  box-shadow:0 24px 60px rgba(212,114,143,.35);
+}
+.env-pocket {
+  position:absolute; inset:0; z-index:3;
+  background:linear-gradient(160deg,#fbdce6,#f5cdd9);
+  border-radius:10px;
+  clip-path:polygon(0 30%, 50% 72%, 100% 30%, 100% 100%, 0 100%);
+  box-shadow:inset 0 6px 14px rgba(212,114,143,.12);
+}
+
+/* sayap samping & bawah (garis lipatan) */
+.flap {
+  position:absolute; z-index:4; pointer-events:none;
+  transition:transform 1s cubic-bezier(.77,0,.18,1);
+}
+.flap.left {
+  top:0; left:0; width:52%; height:100%;
+  background:linear-gradient(120deg,#fce3ea,#f7d2de);
+  clip-path:polygon(0 0, 100% 62%, 0 100%);
+  border-radius:10px 0 0 10px;
+}
+.flap.right {
+  top:0; right:0; width:52%; height:100%;
+  background:linear-gradient(-120deg,#fce3ea,#f7d2de);
+  clip-path:polygon(100% 0, 0 62%, 100% 100%);
+  border-radius:0 10px 10px 0;
+}
+.flap.bottom {
+  bottom:0; left:0; width:100%; height:55%;
+  background:linear-gradient(0deg,#fbdce6,#f6d3dd);
+  clip-path:polygon(0 100%, 50% 0, 100% 100%);
+  border-radius:0 0 10px 10px;
+}
+
+/* tutup atas */
+.env-flap-top {
+  position:absolute; top:0; left:0; width:100%; height:62%; z-index:5;
+  background:linear-gradient(180deg,#fad4df,#f5c8d6);
+  clip-path:polygon(0 0, 100% 0, 50% 100%);
+  border-radius:10px 10px 0 0;
+  transform-origin:top;
+  transition:transform 1s cubic-bezier(.77,0,.18,1), z-index 0s .4s;
+  box-shadow:0 4px 14px rgba(212,114,143,.2);
+}
+
+/* segel wax */
+.wax-seal {
+  position:absolute; top:52%; left:50%; z-index:6;
+  width:62px; height:62px; margin:-31px 0 0 -31px;
+  background:radial-gradient(circle at 35% 35%,#ef92b2,#c95f82 70%,#a94a6c);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 18px rgba(169,74,108,.45), inset 0 2px 6px rgba(255,255,255,.3);
+  cursor:pointer; transition:.4s;
+  font-family:'Noto Serif KR',serif; color:#fff2f5; font-size:.85rem; gap:2px;
+}
+.wax-seal span, .wax-seal em { font-style:normal; }
+.wax-seal::before {
+  content:''; position:absolute; inset:-6px;
+  border-radius:50%; border:2px dashed rgba(255,255,255,.35);
+}
+.wax-seal:hover { transform:scale(1.12); }
+.wax-seal:active { transform:scale(.95); }
+
+/* ── STATE: amplop terbuka (VERSI FIX 100% DIJAMIN RAPI) ── */
+.envelope.opened { animation:none; }
+
+/* Tutup atas melipat ke belakang dan disembunyikan di balik latar */
+.envelope.opened .env-flap-top { 
+  transform: rotateX(180deg); 
+  z-index: 0; 
+  transition: transform 0.6s ease, z-index 0s ease 0.3s;
+}
+
+/* PERBAIKAN TOTAL: Saat amplop terbuka, hilangkan sayap kiri secara halus agar tidak merusak visual kartu */
+.envelope.opened .flap.left { 
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* PERBAIKAN TOTAL: Saat amplop terbuka, hilangkan sayap kanan secara halus agar tidak merusak visual kartu */
+.envelope.opened .flap.right { 
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Lipatan bawah tetap rapi menopang di area bawah amplop */
+.envelope.opened .flap.bottom { 
+  transform: translateY(10px);
+  z-index: 2; 
+  transition: transform 0.5s ease;
+}
+
+/* Segel wax menghilang */
+.envelope.opened .wax-seal {
+  transform:scale(0) rotate(90deg); opacity:0; pointer-events:none;
+  transition:transform .5s ease, opacity .5s ease;
+}
+
+/* KUNCI UTAMA: Kartu meluncur naik ke atas dengan z-index 7, terlihat sangat bersih, rapi, dan simetris */
+.envelope.opened .env-card {
+  opacity:1; 
+  transform:translateY(-95px) scale(1.02);
+  z-index: 7; 
+  transition: transform 0.8s cubic-bezier(.2, .8, .3, 1.1) 0.4s, opacity 0.4s ease 0.4s;
+}
+
+/* ── STATE: gerbang membuka ── */
+.envelope.gate-away {
+  transform:translateY(-40vh) scale(.4) rotate(-4deg);
+  opacity:0; transition:all 1.1s cubic-bezier(.6,-.2,.3,1);
+}
+.env-hint.fade { opacity:0; transition:.5s; }
+
+/* mobile */
+@media (max-width:480px){
+  .envelope { width:250px; height:168px; }
+  .wax-seal { width:54px; height:54px; margin:-27px 0 0 -27px; font-size:.75rem; }
+  .env-card h3 { font-size:1.5rem; }
+  .door-ornament { font-size:3rem; }
+}
+
+/* ═══════════ HERO ═══════════ */
+.hero {
+  min-height:100vh; position:relative;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 70% 20%, #fde0ea 0%, transparent 55%),
+             radial-gradient(circle at 20% 80%, #f9e9dd 0%, transparent 50%),
+             linear-gradient(180deg,#fdf3f6,#fdf9f6);
+  z-index:-1;
+}
+.hanji-circle {
+  position:absolute; border-radius:50%;
+  border:1px solid rgba(212,114,143,.18);
+  animation:drift 12s ease-in-out infinite;
+}
+.hanji-circle:nth-child(2){ width:420px;height:420px; top:-120px; right:-120px; }
+.hanji-circle:nth-child(3){ width:280px;height:280px; bottom:8%; left:-80px; animation-delay:-4s; }
+.hanji-circle:nth-child(4){ width:160px;height:160px; top:30%; left:12%; animation-delay:-8s; }
+@keyframes drift { 0%,100%{transform:translate(0,0)} 33%{transform:translate(14px,-20px)} 66%{transform:translate(-10px,12px)} }
+
+.hero .label {
+  font-family:'Noto Serif KR',serif; font-weight:200;
+  letter-spacing:8px; color:#b98a96; font-size:.8rem;
+}
+.hero .names {
+  font-family:'Noto Serif KR',serif; font-weight:200;
+  font-size:clamp(2.6rem,9vw,4.5rem);
+  margin:18px 0; color:var(--ink);
+}
+.hero .amp {
+  font-family:'Parisienne',cursive; color:var(--gold);
+  font-size:2rem; display:block; margin:2px 0;
+}
+.hero-line {
+  width:1px; height:70px; margin:26px auto 0;
+  background:linear-gradient(var(--gold), transparent);
+  animation:growLine 2s ease both;
+}
+@keyframes growLine { from { height:0; } }
+
+/* fade-up utilities */
+[data-reveal] {
+  opacity:0; transform:translateY(40px);
+  transition:opacity 1s cubic-bezier(.2,.7,.3,1), transform 1s cubic-bezier(.2,.7,.3,1);
+}
+[data-reveal].in { opacity:1; transform:none; }
+
+/* ═══════════ SECTIONS ═══════════ */
+section { max-width:680px; margin:0 auto; padding:90px 24px; text-align:center; }
+.k-label {
+  font-family:'Noto Serif KR',serif; font-weight:200;
+  letter-spacing:7px; color:var(--pink); font-size:.78rem; margin-bottom:10px;
+}
+.k-title {
+  font-family:'Parisienne',cursive;
+  font-size:clamp(1.9rem,6vw,2.6rem);
+  color:var(--ink); margin-bottom:40px;
+}
+.k-title::after {
+  content:''; display:block; width:44px; height:2px;
+  background:var(--gold); margin:16px auto 0; border-radius:2px;
+}
+
+/* quote */
+.quote { font-size:1rem; line-height:2.2; color:#7c6560; font-style:italic; }
+.quote .kr { font-family:'Noto Serif KR',serif; font-style:normal; color:var(--pink); display:block; margin-bottom:16px; font-size:1.15rem; }
+
+/* couple — tilt cards (VERSI KUNCI SEJAJAR HORIZONTAL DI SEMUA LAYAR) */
+.couple { 
+  display: flex; 
+  flex-direction: row; /* Memaksa kartu selalu berjejer ke samping (kiri-kanan) */
+  flex-wrap: nowrap;   /* Melarang kartu untuk turun ke bawah dalam kondisi layar sesempit apa pun */
+  gap: 8px;            /* Jarak antar kartu disesuaikan agar hemat ruang di HP */
+  justify-content: center; 
+  align-items: stretch; /* Memaksa tinggi kotak kedua kartu selalu persis sama rata */
+  width: 100%;
+  max-width: 600px;    /* Batas lebar maksimal area couple */
+  margin: 0 auto;
+}
+
+.card {
+  position: relative; 
+  flex: 1 1 45%;       /* Membagi ruang secara adil (masing-masing kartu mengambil kisaran 45% lebar layar) */
+  max-width: 270px;
+  background: rgba(255, 255, 255, 0.75); 
+  backdrop-filter: blur(8px);
+  border: 1px solid #f3dbe2; 
+  border-radius: 16px;
+  padding: 24px 12px 20px; /* Padding diperkecil agar teks tidak berdesakan di layar HP */
+  overflow: hidden;
+  transition: transform 0.45s cubic-bezier(.2,.8,.3,1.2), box-shadow 0.45s, opacity 1s cubic-bezier(.2,.7,.3,1);
+  
+  /* Layout internal flexbox vertikal */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mengaktifkan efek animasi hover miring yang responsif */
+.card:hover { 
+  transform: translateY(-8px) rotate(-1deg); 
+  box-shadow: 0 15px 35px rgba(212, 114, 143, 0.15); 
+}
+
+.card::before {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle, #fbd9e5, transparent 70%);
+}
+
+/* Foto avatar otomatis mengecil secara proporsional di layar HP kecil */
+.card .avatar {
+  width: clamp(70px, 18vw, 110px); 
+  height: clamp(70px, 18vw, 110px); 
+  margin: 0 auto 12px; 
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--gold), 0 6px 15px rgba(212, 114, 143, 0.15);
+  transition: 0.5s;
+}
+.card:hover .avatar { transform: scale(1.05) rotate(3deg); }
+
+/* Ukuran font adaptif menggunakan clamp agar tidak patah berantakan di layar kecil */
+.card h3 { 
+  font-family: 'Noto Serif KR', serif; 
+  font-size: clamp(1rem, 3.5vw, 1.35rem); 
+  font-weight: 400; 
+  text-align: center; 
+  color: var(--ink);
+}
+
+.card .kr-name {
+  font-family: 'Noto Serif KR', serif; 
+  color: var(--pink);
+  letter-spacing: 2px; 
+  font-size: clamp(0.75rem, 2.5vw, 0.9rem); 
+  margin: 4px 0 10px; 
+  text-align: center;
+}
+
+/* Memaksa posisi kalimat teks deskripsi selalu mengunci sejajar di dasar bawah kartu */
+.card p { 
+  font-size: clamp(0.7rem, 2.2vw, 0.85rem); 
+  color: #96807b; 
+  line-height: 1.5;
+  text-align: center;
+  margin-top: auto; /* Kunci pendorong otomatis agar dasar kalimat sejajar lurus */
+}
+
+/* Perbaikan Simbol Tengah agar posisinya pas di antara kedua kartu */
+.amp-mid {
+  align-self: center; 
+  font-family: 'Parisienne', cursive;
+  font-size: clamp(1.8rem, 6vw, 3rem); 
+  color: var(--gold);
+  pointer-events: none; 
+  margin: 0 4px;
+  z-index: 5;
+}
+
+/* timeline acara */
+.timeline { position:relative; text-align:left; max-width:420px; margin:0 auto; }
+.timeline::before {
+  content:''; position:absolute; left:19px; top:10px; bottom:10px;
+  width:2px; background:linear-gradient(var(--pink),var(--gold));
+  border-radius:2px;
+}
+.tl-item { position:relative; padding:0 0 42px 60px; }
+.tl-item:last-child { padding-bottom:0; }
+.tl-dot {
+  position:absolute; left:8px; top:2px; width:24px; height:24px;
+  border-radius:50%; background:#fff;
+  border:2px solid var(--pink);
+  display:flex; align-items:center; justify-content:center; font-size:.7rem;
+  animation:softPulse 3s infinite;
+}
+.tl-item h4 { font-family:'Noto Serif KR',serif; font-weight:700; color:var(--pink); letter-spacing:1px; }
+.tl-item .t-time { font-size:.8rem; letter-spacing:2px; color:var(--gold); margin:4px 0 8px; }
+.tl-item p { font-size:.9rem; color:#7c6560; }
+
+/* countdown */
+.count-wrap { display:flex; gap:14px; justify-content:center; }
+.cbox {
+  background:#fff; border:1px solid #f3dbe2; border-radius:16px;
+  width:74px; padding:16px 0 12px;
+  box-shadow:0 8px 24px rgba(212,114,143,.1);
+  transition:.3s;
+}
+.cbox:hover { transform:translateY(-6px); border-color:var(--pink); }
+.cbox .num {
+  font-family:'Noto Serif KR',serif; font-weight:700;
+  font-size:1.7rem; color:var(--pink);
+}
+.cbox .lbl { font-size:.62rem; letter-spacing:3px; color:#b0938d; margin-top:4px; }
+
+/* gallery */
+.gal { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.gal img {
+  width:100%; height:230px; object-fit:cover; border-radius:16px;
+  transition:.6s cubic-bezier(.2,.8,.3,1);
+  filter:saturate(.92);
+}
+.gal img:nth-child(1){ height:290px; }
+.gal img:nth-child(4){ height:290px; }
+.gal img:hover { transform:scale(1.045) rotate(-.6deg); filter:saturate(1.1); box-shadow:0 18px 40px rgba(212,114,143,.25); }
+
+/* location */
+.map-box {
+  border-radius:20px; overflow:hidden;
+  border:1px solid #f0d5dd;
+  box-shadow:0 16px 40px rgba(212,114,143,.12);
+  height:320px; max-width:640px; margin:0 auto;
+}
+.map-box iframe { width:100%; height:100%; border:0; filter:sepia(.15) saturate(.9); }
+
+/* rsvp / wishes */
+.glass-form {
+  max-width:560px; margin:0 auto;
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(12px);
+  border:1px solid #f3dbe2; border-radius:22px;
+  padding:36px 30px; text-align:left;
+  box-shadow:0 16px 40px rgba(212,114,143,.1);
+}
+input, select, textarea {
+  width:100%; padding:14px 18px; margin-bottom:14px;
+  border:1px solid #ecd3db; border-radius:12px;
+  font-family:'Gowun Batang',serif; font-size:.95rem;
+  background:#fffdfa; color:var(--ink); outline:none;
+  transition:.3s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color:var(--pink); box-shadow:0 0 0 4px rgba(212,114,143,.1);
+}
+textarea { min-height:100px; resize:vertical; }
+
+.btn {
+  display:inline-block; cursor:pointer; border:none;
+  background:linear-gradient(135deg,#e0709a,#c96b8b);
+  color:#fff; padding:15px 46px; border-radius:60px;
+  font-family:'Noto Serif KR',serif; letter-spacing:3px;
+  font-size:.95rem; transition:.35s;
+  box-shadow:0 8px 24px rgba(224,112,154,.35);
+  position:relative; overflow:hidden;
+}
+.btn::after {
+  content:''; position:absolute; top:0; left:-100%;
+  width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  transition:.5s;
+}
+.btn:hover { transform:translateY(-3px); box-shadow:0 14px 34px rgba(224,112,154,.45); }
+.btn:hover::after { left:100%; }
+
+/* wish list */
+.wish-list { margin-top:30px; text-align:left; max-height:320px; overflow-y:auto; padding-right:6px; }
+.wish-item {
+  background:#fff; border:1px solid #f3dbe2; border-radius:14px;
+  padding:18px 20px; margin-bottom:12px;
+  animation:wishIn .5s cubic-bezier(.2,.8,.3,1.2) both;
+}
+@keyframes wishIn { from { opacity:0; transform:translateY(16px) scale(.97); } }
+.wish-item strong { color:var(--pink); font-family:'Noto Serif KR',serif; }
+.wish-item p { font-size:.9rem; color:#7c6560; margin-top:6px; }
+.wish-item .badge {
+  float:right; font-size:.7rem; background:var(--blush);
+  color:var(--pink); padding:3px 10px; border-radius:20px;
+}
+
+/* gift box */
+.gift-box { font-size:3rem; cursor:pointer; display:inline-block; transition:.4s; }
+.gift-box:hover { transform:scale(1.15) rotate(-5deg); }
+.gift-box.shake { animation:giftShake .6s ease; }
+@keyframes giftShake {
+  0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)}
+  50%{transform:rotate(8deg)} 75%{transform:rotate(-5deg)}
+}
+.gift-detail { max-height:0; overflow:hidden; transition:max-height .6s ease; }
+.gift-detail.open { max-height:600px; }
+.copy-btn {
+  background:var(--blush); border:1px solid var(--pink); color:var(--pink);
+  border-radius:8px; padding:5px 14px; cursor:pointer; font-size:.75rem;
+  letter-spacing:1px; margin-left:10px; transition:.3s; font-family:inherit;
+}
+.copy-btn:hover { background:var(--pink); color:#fff; }
+
+/* footer */
+footer {
+  text-align:center; padding:80px 20px 60px;
+  background:linear-gradient(180deg,var(--cream),#fbdce6);
+}
+footer .kr-big {
+  font-family:'Noto Serif KR',serif; font-weight:200;
+  font-size:2.4rem; color:var(--pink); letter-spacing:8px; margin-bottom:14px;
+}
+footer .names-sm { font-family:'Parisienne',cursive; font-size:2rem; color:var(--ink); margin-top:20px; }
+
+/* audio floating button */
+#audioToggle {
+  position:fixed; bottom:24px; right:24px; z-index:60;
+  width:52px; height:52px; border-radius:50%;
+  background:rgba(255,255,255,.9); border:1px solid var(--pink);
+  cursor:pointer; font-size:1.2rem;
+  box-shadow:0 8px 24px rgba(212,114,143,.3);
+  transition:.3s; display:flex; align-items:center; justify-content:center;
+}
+#audioToggle:hover { transform:scale(1.1); }
+#audioToggle.playing { animation:softPulse 1.6s infinite; }
+
+/* nav dots */
+.nav-dots {
+  position:fixed; left:16px; top:50%; transform:translateY(-50%);
+  z-index:60; display:flex; flex-direction:column; gap:14px;
+}
+.nav-dots a {
+  width:9px; height:9px; border-radius:50%;
+  background:#e5c3ce; transition:.3s; display:block;
+}
+.nav-dots a.active { background:var(--pink); transform:scale(1.5); }
+.nav-dots a:hover { transform:scale(1.8); }
+
+@media (max-width:600px){
+  .nav-dots { display:none; }
+  .gal img { height:180px !important; }
+  .gal img:nth-child(1), .gal img:nth-child(4) { height:220px !important; }
+  .cbox { width:64px; }
+  .amp-mid { font-size:2rem; }
+}
+</style>
+</head>
+<body class="locked">
+
+<!-- ═══════════ SAKURA CANVAS ═══════════ -->
+<canvas id="petals"></canvas>
+
+<!-- ═══════════ ENVELOPE + GATE COVER ═══════════ -->
+<div id="cover">
+
+  <!-- gerbang / pintu -->
+  <div class="gate">
+    <div class="gate-door left">
+      <div class="door-ornament">❀</div>
+    </div>
+    <div class="gate-door right">
+      <div class="door-ornament">❀</div>
+    </div>
+  </div>
+
+  <!-- amplop -->
+  <div class="env-stage">
+    <div class="envelope" id="envelope">
+      <!-- kartu di dalam amplop -->
+      <div class="env-card">
+        <p class="ec-hangul">청첩장</p>
+        <h3>MEIDIANA <span class="amp">&amp;</span> FERRI</h3>
+        <p class="ec-date">2026 · 12 · 15</p>
+      </div>
+      <!-- badan amplop -->
+      <div class="env-back"></div>
+      <div class="env-letter"></div>
+      <div class="env-pocket"></div>
+      <!-- sayap kiri/kanan/bawah (flap) -->
+      <div class="flap left"></div>
+      <div class="flap right"></div>
+      <div class="flap bottom"></div>
+      <!-- tutup atas + segel -->
+      <div class="env-flap-top"></div>
+      <div class="wax-seal" id="waxSeal"><span>M</span><em>F</em></div>
+    </div>
+    <p class="env-hint" id="envHint">ketuk amplop untuk membuka ✨</p>
+    <p id="guestName" style="margin-top:14px;color:#b0938d;font-size:.9rem;"></p>
+  </div>
+
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hanji-circle"></div>
+  <div class="hanji-circle"></div>
+  <div class="hanji-circle"></div>
+  <div class="hanji-circle"></div>
+  <p class="label" data-reveal>THE WEDDING OF</p>
+  <h1 class="names" data-reveal>MEIDIANA <span class="amp">&amp;</span> FERRI</h1>
+  <p class="cover-date" data-reveal>15 DECEMBER 2026 · JAKARTA</p>
+  <div class="hero-line"></div>
+</header>
+
+<!-- ═══════════ QUOTE ═══════════ -->
+<section id="quote">
+  <p class="k-label" data-reveal>서두</p>
+  <h2 class="k-title" data-reveal>A Letter to You</h2>
+  <div class="quote" data-reveal>
+    <span class="kr">"사랑은 다시 만나기 위해 흩어지는 것"</span>
+    Cinta adalah perjalanan menuju satu tujuan yang sama.<br>
+    Dengan penuh rasa syukur, kami mengundang Anda<br>
+    untuk hadir dan memberi doa restu pada hari bahagia kami.
+  </div>
+</section>
+
+<!-- ═══════════ COUPLE ═══════════ -->
+<section id="couple">
+  <p class="k-label" data-reveal>신랑 &amp; 신부</p>
+  <h2 class="k-title" data-reveal>PASANGAN</h2>
+  <div class="couple">
+    <div class="card" data-reveal>
+      <img class="avatar" src="https://i.pravatar.cc/220?img=12" alt="MEIDIANA">
+      <h3>MEIDIANA</h3>
+      <p class="kr-name">메디아나</p>
+      <!-- Kalimat hobi dihapus agar baris teks seimbang -->
+      <p class="bio">Anak pertama dari pasangan Bpk. DJAMOEN &amp; Ibu NAIMAH</p>
+    </div>
+    <div class="amp-mid" data-reveal>&amp;</div>
+    <div class="card" data-reveal>
+      <img class="avatar" src="https://i.pravatar.cc/220?img=47" alt="FERRI">
+      <h3>FERRI</h3>
+      <p class="kr-name">나룻배</p>
+      <!-- Kalimat hobi dihapus agar baris teks seimbang -->
+      <p class="bio">Anak kedua dari pasangan Bpk. Lee Chanwoo &amp; Ibu Park Dasom</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ EVENTS / COUNTDOWN ═══════════ -->
+<section id="events">
+  <p class="k-label" data-reveal>일정</p>
+  <h2 class="k-title" data-reveal>Save the Date</h2>
+
+  <div class="count-wrap" data-reveal>
+    <div class="cbox"><div class="num" id="d">00</div><div class="lbl">HARI</div></div>
+    <div class="cbox"><div class="num" id="h">00</div><div class="lbl">JAM</div></div>
+    <div class="cbox"><div class="num" id="m">00</div><div class="lbl">MENIT</div></div>
+    <div class="cbox"><div class="num" id="s">00</div><div class="lbl">DETIK</div></div>
+  </div>
+
+  <br>
+
+  <div class="timeline" data-reveal>
+    <div class="tl-item">
+      <div class="tl-dot">💍</div>
+      <h4>AKAD NIKAH</h4>
+      <p class="t-time">SABTU · 15 DECEMBER 2026 · 08:00</p>
+      <p>Disaksikan upacara tradisional Korea<br>The Grand Ballroom, Hotel Shilla Seoul</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">🎉</div>
+      <h4>RESEPSI</h4>
+      <p class="t-time">SABTU · 15 DECEMBER 2026 · 11:30</p>
+      <p>Makan siang &amp; perayaan bersama keluarga<br>The Garden Terrace, Hotel Shilla Seoul</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ GALLERY ═══════════ -->
+<section id="gallery">
+  <p class="k-label" data-reveal>우리의 순간</p>
+  <h2 class="k-title" data-reveal>Our Moments</h2>
+  <div class="gal" data-reveal>
+    <img src="https://picsum.photos/seed/kwed1/500/640" alt="Moment 1">
+    <img src="https://picsum.photos/seed/kwed2/500/460" alt="Moment 2">
+    <img src="https://picsum.photos/seed/kwed3/500/460" alt="Moment 3">
+    <img src="https://picsum.photos/seed/kwed4/500/640" alt="Moment 4">
+    <img src="https://picsum.photos/seed/kwed5/500/460" alt="Moment 5">
+    <img src="https://picsum.photos/seed/kwed6/500/460" alt="Moment 6">
+  </div>
+</section>
+
+<!-- ═══════════ LOCATION ═══════════ -->
+<section id="location">
+  <p class="k-label" data-reveal>오시는 길</p>
+  <h2 class="k-title" data-reveal>Location</h2>
+  <div class="map-box" data-reveal>
+    <iframe src="https://www.google.com/maps?q=The+Shilla+Seoul&output=embed" loading="lazy"></iframe>
+  </div>
+  <br data-reveal>
+  <a class="btn" data-reveal href="https://maps.google.com/?q=The+Shilla+Seoul" target="_blank" rel="noopener">📍 BUKA GOOGLE MAPS</a>
+</section>
+
+<!-- ═══════════ RSVP & WISHES ═══════════ -->
+<section id="rsvp">
+  <p class="k-label" data-reveal>참석 여부</p>
+  <h2 class="k-title" data-reveal>RSVP &amp; Wishes</h2>
+
+  <div class="glass-form" data-reveal>
+    <input type="text" id="wName" placeholder="Nama Anda" maxlength="50">
+    <select id="wAttend">
+      <option value="Hadir">✅ Hadir</option>
+      <option value="Tidak hadir">❌ Tidak hadir</option>
+      <option value="Masih ragu">🤔 Masih ragu</option>
+    </select>
+    <textarea id="wMsg" placeholder="Tuliskan ucapan & doa untuk MEIDIANA & FERRI..."></textarea>
+    <div style="text-align:center;">
+      <button class="btn" id="wishBtn">🌸 KIRIM UCAPAN</button>
+    </div>
+  </div>
+
+  <div class="wish-list" id="wishList" data-reveal>
+    <div class="wish-item">
+      <span class="badge">Hadir</span>
+      <strong>Minji</strong>
+      <p>Selamat menempuh hidup baru, MEIDIANA &amp; FERRI! Semoga bahagia selamanya 💕</p>
+    </div>
+    <div class="wish-item">
+      <span class="badge">Hadir</span>
+      <strong>Daniel</strong>
+      <p>Sampai jumpa di Seoul! Aku sangat senang bisa hadir di hari bahagia kalian 🎉</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ GIFT ═══════════ -->
+<section id="gift">
+  <p class="k-label" data-reveal>마음 전하기</p>
+  <h2 class="k-title" data-reveal>Wedding Gift</h2>
+  <p class="quote" data-reveal style="margin-bottom:24px;">
+    Doa restu Anda adalah hadiah terindah.<br>
+    Namun jika ingin berbagi kebahagiaan, silakan klik kotak di bawah 💝
+  </p>
+  <div class="gift-box" id="giftBox" data-reveal>🎁</div>
+
+  <div class="gift-detail" id="giftDetail" data-reveal>
+    <div class="glass-form" style="margin-top:26px; text-align:center;">
+      <p style="font-family:'Noto Serif KR',serif; color:var(--pink); letter-spacing:2px; margin-bottom:16px;">— BANK BCA —</p>
+      <p style="font-size:.95rem;">MEIDIANA</p>
+      <p style="font-size:1.05rem; letter-spacing:2px; margin:6px 0 14px;">
+        1234-56-789012
+        <button class="copy-btn" data-copy="1234-56-789012">SALIN</button>
+      </p>
+      <p style="font-size:.95rem;">FERRI</p>
+      <p style="font-size:1.05rem; letter-spacing:2px; margin:6px 0;">
+        9876-54-321098
+        <button class="copy-btn" data-copy="9876-54-321098">SALIN</button>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <p class="kr-big" data-reveal>감사합니다</p>
+  <p data-reveal style="color:#9b7a83; font-size:.95rem; line-height:2;">
+    Merupakan suatu kehormatan dan kebahagiaan bagi kami<br>
+    apabila Bapak/Ibu/Saudara berkenan hadir<br>
+    untuk memberikan doa restu.
+  </p>
+  <p class="names-sm" data-reveal>MEIDIANA &amp; FERRI</p>
+</footer>
+
+<!-- ═══════════ AUDIO & NAV ═══════════ -->
+<button id="audioToggle" title="Musik">🎵</button>
+
+<nav class="nav-dots">
+  <a href="#home" title="Home"></a>
+  <a href="#couple" title="Couple"></a>
+  <a href="#events" title="Events"></a>
+  <a href="#gallery" title="Gallery"></a>
+  <a href="#rsvp" title="RSVP"></a>
+</nav>
+
+<script>
+/* ═══ SAKURA PETALS ═══ */
+const canvas = document.getElementById('petals');
+const ctx = canvas.getContext('2d');
+let petals = [];
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+resize(); addEventListener('resize', resize);
+
+class Petal {
+  constructor(){
+    this.reset(true);
+  }
+  reset(init){
+    this.x = Math.random() * canvas.width;
+    this.y = init ? Math.random() * canvas.height : -20;
+    this.size = Math.random() * 8 + 4;
+    this.speedY = Math.random() * 1.2 + .4;
+    this.speedX = Math.random() * .8 - .4;
+    this.rot = Math.random() * Math.PI * 2;
+    this.rotSpeed = (Math.random() - .5) * .04;
+    this.opacity = Math.random() * .5 + .3;
+  }
+  update(){
+    this.y += this.speedY;
+    this.x += this.speedX + Math.sin(this.y * .01) * .4;
+    this.rot += this.rotSpeed;
+    if (this.y > canvas.height + 20) this.reset(false);
+  }
+  draw(){
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    ctx.globalAlpha = this.opacity;
+    ctx.fillStyle = '#f6b8cc';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.size, this.size * .55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+for (let i = 0; i < 32; i++) petals.push(new Petal());
+(function loop(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  petals.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(loop);
+})();
+
+/* ═══ PROCEDURAL SOUND EFFECT GENERATOR ═══ */
+// Menghasilkan efek suara gesekan kertas "paper slide / whoosh" tanpa aset file eksternal
+function playWhoosh(){
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const buffer = ac.createBuffer(1, ac.sampleRate * .6, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / data.length) * .15;
+    }
+    const src = ac.createBufferSource();
+    const filter = ac.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.value = 900;
+    src.buffer = buffer; src.connect(filter); filter.connect(ac.destination);
+    src.start();
+  } catch(e){}
+}
+
+const cover    = document.getElementById('cover');
+const envelope = document.getElementById('envelope');
+const hint     = document.getElementById('envHint');
+
+envelope.addEventListener('click', function(){
+  if (envelope.classList.contains('opened')) return;
+
+  envelope.classList.add('opened');
+  playWhoosh();
+  startAudio();
+  hint.classList.add('fade');
+  hint.textContent = '';
+
+  setTimeout(() => {
+    envelope.classList.add('gate-away');
+    cover.classList.add('gate-open');
+  }, 1700);
+
+  setTimeout(() => {
+    cover.classList.add('open');
+    document.body.classList.remove('locked');
+    setTimeout(initReveal, 900);
+  }, 3400);
+});
+
+/* ═══ SCROLL REVEAL ═══ */
+let coverOpen = false;
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting && coverOpen) e.target.classList.add('in'); });
+}, { threshold: .12 });
+const revealEls = document.querySelectorAll('[data-reveal]');
+revealEls.forEach(el => io.observe(el));
+function initReveal(){
+  coverOpen = true;
+  revealEls.forEach(el => { io.unobserve(el); io.observe(el); });
+}
+
+/* ═══ COUNTDOWN ═══ */
+const target = new Date('2026-12-15T08:30:00+07:00').getTime();
+function tick(){
+  const now = Date.now();
+  let diff = Math.max(0, target - now);
+  const d = Math.floor(diff / 864e5);
+  const h = Math.floor(diff % 864e5 / 36e5);
+  const m = Math.floor(diff % 36e5 / 6e4);
+  const s = Math.floor(diff % 6e4 / 1e3);
+  document.getElementById('d').textContent = String(d).padStart(2,'0');
+  document.getElementById('h').textContent = String(h).padStart(2,'0');
+  document.getElementById('m').textContent = String(m).padStart(2,'0');
+  document.getElementById('s').textContent = String(s).padStart(2,'0');
+  if (diff === 0) document.querySelector('.count-wrap').innerHTML =
+  '<p class="quote">Hari bahagia telah tiba 💕</p>';
+}
+tick(); setInterval(tick, 1000);
+
+/* ═══ WISHES ═══ */
+const wishList = document.getElementById('wishList');
+document.getElementById('wishBtn').addEventListener('click', function(){
+  const name = document.getElementById('wName').value.trim();
+  const msg  = document.getElementById('wMsg').value.trim();
+  const att  = document.getElementById('wAttend').value;
+  if (!name || !msg) {
+    this.textContent = '⚠ MOHON LENGKAPI';
+    setTimeout(() => this.textContent = '🌸 KIRIM UCAPAN', 1500);
+    return;
+  }
+  const item = document.createElement('div');
+  item.className = 'wish-item';
+  item.innerHTML = '<span class="badge">' + att + '</span><strong></strong><p></p>';
+  item.querySelector('strong').textContent = name;
+  item.querySelector('p').textContent = msg;
+  wishList.prepend(item);
+  document.getElementById('wName').value = '';
+  document.getElementById('wMsg').value = '';
+  this.textContent = '✔ TERKIRIM! 감사합니다';
+  setTimeout(() => this.textContent = '🌸 KIRIM UCAPAN', 2000);
+});
+
+/* ═══ GIFT BOX ═══ */
+const giftBox = document.getElementById('giftBox');
+giftBox.addEventListener('click', function(){
+  this.classList.add('shake');
+  setTimeout(() => this.classList.remove('shake'), 600);
+  const isOpen = document.getElementById('giftDetail').classList.toggle('open');
+this.textContent = isOpen ? '💌' : '🎁';
+});
+
+/* ═══ COPY BUTTONS ═══ */
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    const txt = this.dataset.copy;
+    navigator.clipboard.writeText(txt).then(() => {
+      const old = this.textContent;
+      this.textContent = '✔ TERSALIN';
+      setTimeout(() => this.textContent = old, 1500);
+    });
+  });
+});
+
+/* ═══ AUDIO ═══ */
+const audio = new Audio('lagu.mp3');
+audio.loop = true;
+audio.volume = .5;
+audio.preload = 'auto';
+let playing = false;
+const audioBtn = document.getElementById('audioToggle');
+
+audio.addEventListener('error', () => {
+  console.error('Gagal memuat lagu.mp3. Cek nama file dan lokasinya.', audio.error);
+});
+
+function startAudio(){
+  audio.play().then(() => {
+    playing = true;
+    audioBtn.classList.add('playing');
+    audioBtn.textContent = '🎵';
+  }).catch(err => {
+    console.error('Musik diblokir/gagal:', err);
+  });
+}
+
+audioBtn.addEventListener('click', function(){
+  if (playing) {
+    audio.pause(); playing = false;
+    this.classList.remove('playing');
+    this.textContent = '🔇';
+  } else {
+    startAudio();
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!playing) return;
+  document.hidden ? audio.pause() : audio.play().catch(()=>{});
+});
+
+/* ═══ NAV DOTS ACTIVE ═══ */
+const sections = document.querySelectorAll('header.hero, section');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    if (scrollY >= sec.offsetTop - innerHeight / 3) current = sec.id;
+  });
+  document.querySelectorAll('.nav-dots a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+/* ═══ NAMA TAMU DARI LINK ═══ */
+const g = new URLSearchParams(location.search).get('to');
+if (g) {
+  document.getElementById('wName').value = g;
+  document.getElementById('guestName').textContent = 'Kepada Yth. ' + g;
+}
+</script>
+</body>
+</html>
