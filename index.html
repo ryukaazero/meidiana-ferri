@@ -235,6 +235,36 @@ footer{text-align:center;padding:70px 20px 60px;background:linear-gradient(180de
   .oval.on .lf{opacity:.95!important;transform:rotate(var(--ro))!important}
   .fp{display:none}
 }
+  /* === TAMBAHAN OPTIMALISASI SMOOTH MOBILE === */
+*, ::before, ::after {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Memaksa elemen bergerak dirender oleh GPU HP */
+.gate-door, 
+.envelope, 
+.env-card, 
+.env-flap-top, 
+.flap, 
+.wax-seal, 
+.arch, 
+.card, 
+.photo img, 
+.oval, 
+.gal img, 
+.bf, 
+.ly, 
+.hedge {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Mencegah lag saat halaman digulir */
+html, body {
+  -webkit-overflow-scrolling: touch;
+}
 </style>
 </head>
 <body class="locked">
