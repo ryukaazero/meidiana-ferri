@@ -265,6 +265,26 @@ footer{text-align:center;padding:70px 20px 60px;background:linear-gradient(180de
 html, body {
   -webkit-overflow-scrolling: touch;
 }
+  /* === PERBAIKAN IKON MUSIK BERKEDIP & KELOPAK KURANG SMOOTH === */
+
+/* 1. Mencegah ikon musik berkedip putih/glitch saat animasi berjalan */
+#audioToggle {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  isolation: isolate;
+}
+
+/* 2. Menghaluskan pergerakan kelopak bunga agar tidak patah-patah */
+.fp {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Memperhalus transisi kedipan/opacity kelopak */
+  transition: opacity 0.3s ease;
+}
 </style>
 </head>
 <body class="locked">
