@@ -735,11 +735,68 @@ document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',functio
   navigator.clipboard.writeText(this.dataset.copy).then(()=>{const o=this.textContent;this.textContent='✔ Tersalin';setTimeout(()=>this.textContent=o,1500)})}));
 
 /* musik: taruh lagu.mp3 satu folder dengan file ini */
-const au=new Audio('lagu.mp3');au.loop=true;au.volume=.5;let playing=false;const ab=document.getElementById('audioToggle');
-function startAudio(){au.play().then(()=>{playing=true;ab.classList.add('playing');ab.textContent='🎵'}).catch(e=>console.error('Musik gagal:',e))}
-ab.addEventListener('click',()=>{if(playing){au.pause();playing=false;ab.classList.remove('playing');ab.textContent='🔇'}else startAudio()});
-document.addEventListener('visibilitychange',()=>{if(playing)document.hidden?au.pause():au.play().catch(()=>{})});
+const au = new Audio('lagu.mp3');
+au.loop = true;
+au.volume = 0.5;
+let playing = false;
+const ab = document.getElementById('audioToggle');
 
+function startAudio() {
+  if (!playing) {
+    au.play().then(() => {
+      playing = true;
+      ab.classList.add('playing');
+      ab.textContent = '🎵';
+    }).catch(e => {
+      console.log('Autoplay dicegah browser, menunggu interaksi user:', e);
+    });
+  }
+}
+
+// Menjalankan musik secara aman tepat saat amplop diketuk/dibuka
+function openEnv() {
+  if (env.classList.contains('opened')) return;
+  env.classList.add('opened');
+  whoosh();
+  
+  // Panggil musik di sini agar langsung aktif bersamaan dengan klik amplop
+  startAudio(); 
+
+  hint.classList.add('fade');
+  hint.textContent = '';
+  setTimeout(() => {
+    env.classList.add('gate-away');
+    cover.classList.add('gate-open');
+  }, 1700);
+  setTimeout(() => {
+    cover.classList.add('open');
+    document.body.classList.add('play');
+  }, 3400);
+  setTimeout(() => {
+    document.body.classList.remove('locked');
+    initReveal();
+  }, 14000);
+}
+
+ab.addEventListener('click', () => {
+  if (playing) {
+    au.pause();
+    playing = false;
+    ab.classList.remove('playing');
+    ab.textContent = '🔇';
+  } else {
+    startAudio();
+  }
+});
+
+// Mencegah musik mati total jika pengguna beralih aplikasi sebentar
+document.addEventListener('visibilitychange', () => {
+  if (playing && document.hidden) {
+    // Biarkan tetap berjalan atau pause sesuai kenyamanan, 
+    // di sini kita biarkan agar status 'playing' terjaga
+  }
+});
+    
 /* nama tamu dari link: ?to=Nama */
 const g=new URLSearchParams(location.search).get('to');
 if(g){wName.value=g;document.getElementById('guestName').textContent='Kepada Yth. '+g}
