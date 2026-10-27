@@ -633,14 +633,68 @@ function tick(){
 }
 tick();
 
-/* ucapan */
-const wl=document.getElementById('wishList');
-document.getElementById('wishBtn').addEventListener('click',function(){
-  const n=wName.value.trim(),m=wMsg.value.trim();
-  if(!n||!m){this.textContent='⚠ Lengkapi nama & ucapan';setTimeout(()=>this.textContent='🌸 Kirim ucapan',1500);return}
-  const it=document.createElement('div');it.className='wish';it.innerHTML='<span class="bd"></span><strong></strong><p></p>';
-  it.querySelector('.bd').textContent=wAttend.value;it.querySelector('strong').textContent=n;it.querySelector('p').textContent=m;
-  wl.prepend(it);wName.value='';wMsg.value='';this.textContent='✔ Terkirim! 감사합니다';setTimeout(()=>this.textContent='🌸 Kirim ucapan',2000);
+/* ucapan (Terhubung ke Google Sheet - Auto Load) */
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzIxFwLJaqD14e-zlaQrNQUTEwFctomenk0kHxBBOpwEx_7NzH49dfIMkYIlKS02XUE/exec';
+const wl = document.getElementById('wishList');
+
+// Fungsi untuk otomatis memuat semua ucapan dari Google Sheet saat halaman dibuka
+function loadWishes() {
+  fetch(scriptURL)
+    .then(response => response.json())
+    .then(data => {
+      wl.innerHTML = ''; // Bersihkan daftar sementara
+      // Tampilkan ucapan dari yang paling baru di atas
+      data.reverse().forEach(item => {
+        const it = document.createElement('div');
+        it.className = 'wish';
+        it.innerHTML = '<span class="bd"></span><strong></strong><p></p>';
+        it.querySelector('.bd').textContent = item.attend;
+        it.querySelector('strong').textContent = item.name;
+        it.querySelector('p').textContent = item.msg;
+        wl.appendChild(it);
+      });
+    })
+    .catch(error => console.error('Gagal memuat ucapan:', error));
+}
+
+// Jalankan fungsi muat ucapan saat halaman pertama kali dimuat
+window.addEventListener('DOMContentLoaded', loadWishes);
+
+// Event ketika tombol kirim ucapan diklik
+document.getElementById('wishBtn').addEventListener('click', function() {
+  const n = wName.value.trim();
+  const a = wAttend.value;
+  const m = wMsg.value.trim();
+
+  if (!n || !m) {
+    this.textContent = '⚠ Lengkapi nama & ucapan';
+    setTimeout(() => this.textContent = '🌸 Kirim ucapan', 1500);
+    return;
+  }
+
+  this.textContent = 'Mengirim...';
+
+  // Kirim data ke Google Sheet
+  fetch(scriptURL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: n, attend: a, msg: m })
+  })
+  .then(() => {
+    // Beri jeda 1 detik agar data masuk ke sheet, lalu muat ulang daftar ucapan
+    setTimeout(loadWishes, 1000);
+
+    wName.value = '';
+    wMsg.value = '';
+    this.textContent = '✔ Terkirim! 감사합니다';
+    setTimeout(() => this.textContent = '🌸 Kirim ucapan', 2000);
+  })
+  .catch(error => {
+    console.error('Error!', error.message);
+    this.textContent = '❌ Gagal mengirim';
+    setTimeout(() => this.textContent = '🌸 Kirim ucapan', 2000);
+  });
 });
 
 /* hadiah */
