@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>우리의 결혼 — MEIDIANA &amp; FERRI</title>
 <meta property="og:title" content="The Wedding of Meidiana & Ferri">
-<meta property="og:description" content="Kami mengundang Anda di hari bahagia kami, 15 Desember 2026.">
+<meta property="og:description" content="Kami mengundang Anda di hari bahagia kami, 19 Desember 2026.">
 <meta property="og:image" content="GANTI-DENGAN-LINK-FOTO-COVER.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;400;700&family=Gowun+Batang&family=Parisienne&display=swap" rel="stylesheet">
 <style>
@@ -633,31 +633,56 @@ function tick(){
 }
 tick();
 
-/* ucapan (Terhubung ke Google Sheet - Auto Load) */
+/* ucapan (Tampil 5 dulu, dengan tombol Muat Lebih Banyak) */
 const scriptURL = 'https://script.google.com/macros/s/AKfycbzIxFwLJaqD14e-zlaQrNQUTEwFctomenk0kHxBBOpwEx_7NzH49dfIMkYIlKS02XUE/exec';
 const wl = document.getElementById('wishList');
+let allWishes = [];
+let displayedCount = 5; // Batasi awal tampil 5 ucapan
 
-// Fungsi untuk otomatis memuat semua ucapan dari Google Sheet saat halaman dibuka
+// Fungsi untuk memuat ucapan dari Google Sheet
 function loadWishes() {
   fetch(scriptURL)
     .then(response => response.json())
     .then(data => {
-      wl.innerHTML = ''; // Bersihkan daftar sementara
-      // Tampilkan ucapan dari yang paling baru di atas
-      data.reverse().forEach(item => {
-        const it = document.createElement('div');
-        it.className = 'wish';
-        it.innerHTML = '<span class="bd"></span><strong></strong><p></p>';
-        it.querySelector('.bd').textContent = item.attend;
-        it.querySelector('strong').textContent = item.name;
-        it.querySelector('p').textContent = item.msg;
-        wl.appendChild(it);
-      });
+      allWishes = data.reverse(); // Urutkan dari yang terbaru di atas
+      renderWishes();
     })
     .catch(error => console.error('Gagal memuat ucapan:', error));
 }
 
-// Jalankan fungsi muat ucapan saat halaman pertama kali dimuat
+// Fungsi untuk merender/menampilkan ucapan ke layar
+function renderWishes() {
+  wl.innerHTML = ''; // Bersihkan kontainer
+
+  // Ambil data sejumlah yang ditentukan (misal: 5 dulu)
+  const wishesToShow = allWishes.slice(0, displayedCount);
+
+  wishesToShow.forEach(item => {
+    const it = document.createElement('div');
+    it.className = 'wish';
+    it.innerHTML = '<span class="bd"></span><strong></strong><p></p>';
+    it.querySelector('.bd').textContent = item.attend;
+    it.querySelector('strong').textContent = item.name;
+    it.querySelector('p').textContent = item.msg;
+    wl.appendChild(it);
+  });
+
+  // Jika total ucapan di Google Sheet lebih banyak dari yang ditampilkan, 
+  // tampilkan tombol "Muat Lebih Banyak"
+  if (displayedCount < allWishes.length) {
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'btn';
+    loadMoreBtn.style.cssText = 'display: block; margin: 15px auto; padding: 10px 20px; font-size: 0.8rem; cursor: pointer;';
+    loadMoreBtn.textContent = 'Muat Lebih Banyak ⬇';
+    loadMoreBtn.onclick = function() {
+      displayedCount += 5; // Tambah 5 ucapan lagi saat diklik
+      renderWishes();
+    };
+    wl.appendChild(loadMoreBtn);
+  }
+}
+
+// Jalankan saat halaman dibuka
 window.addEventListener('DOMContentLoaded', loadWishes);
 
 // Event ketika tombol kirim ucapan diklik
@@ -682,7 +707,8 @@ document.getElementById('wishBtn').addEventListener('click', function() {
     body: JSON.stringify({ name: n, attend: a, msg: m })
   })
   .then(() => {
-    // Beri jeda 1 detik agar data masuk ke sheet, lalu muat ulang daftar ucapan
+    // Reset tampilan batasan jadi 5 lagi agar ucapan baru langsung nampak di atas
+    displayedCount = 5; 
     setTimeout(loadWishes, 1000);
 
     wName.value = '';
