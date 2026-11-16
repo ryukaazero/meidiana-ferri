@@ -365,6 +365,36 @@ html{overscroll-behavior-x:none}
   .stg{--lift:calc(100lvh - 100svh - 10px)}
   .gwrap{bottom:calc(100lvh - 100svh)}
 }
+
+/* === 6. TERIMA KASIH SETELAH UCAPAN TERKIRIM (di dalam kartu form, font mudah dibaca) === */
+#wishThanks{max-height:0;opacity:0;overflow:hidden;margin:0;padding:0 14px;border-radius:12px;background:#f3ecfb;border:1px solid transparent;
+  font-family:'Gowun Batang',serif;font-size:.95rem;line-height:1.6;color:#5b3f8c;text-align:center;
+  transition:max-height .5s ease,opacity .5s ease,margin .5s ease,padding .5s ease,border-color .5s ease;pointer-events:none}
+#wishThanks.on{max-height:110px;opacity:1;margin:16px 0 0;padding:12px 14px;border-color:#e0d2f1}
+/* === 8. TOMBOL SIMPAN KE KALENDER (di kartu Akad & Resepsi) === */
+.ev p:not(.day):not(.mo){font-size:.88rem;line-height:1.8;color:#6d6180}
+.evcal{margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.evcal button{font:inherit;font-size:.74rem;letter-spacing:2px;padding:10px 20px;border-radius:999px;border:1px solid rgba(201,168,106,.95);background:rgba(255,255,255,.7);color:#8a6a2a;cursor:pointer;transition:background .2s ease,transform .2s ease}
+.evcal button:active{transform:scale(.97);background:rgba(201,168,106,.18)}
+.evcal a{font-size:.74rem;letter-spacing:1px;color:var(--p);text-decoration:underline;text-underline-offset:3px}
+/* === GALERI: HALAMAN 1 2 3 === */
+.gpager{display:flex;align-items:center;justify-content:center;gap:4px;margin:26px auto 0;padding:7px 9px;width:max-content;max-width:100%;background:rgba(255,255,255,.88);border:1px solid #e6daf2;border-radius:999px;box-shadow:0 8px 22px rgba(var(--rgb),.14)}
+.gpager .gp-n{display:flex;gap:4px}
+.gpager button{width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--p);font-family:'Noto Serif KR',serif;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,transform .2s ease}
+.gpager button:active{transform:scale(.92)}
+.gpager .gp-a{font-size:1.45rem;line-height:1;padding-bottom:3px;background:#f3ecfb}
+.gpager .gp-a:disabled{opacity:.35;cursor:default}
+.gpager .gp-n button[aria-current="true"]{background:linear-gradient(135deg,#9b72cf,#7e55b3);color:#fff;box-shadow:0 4px 12px rgba(126,85,179,.35)}
+/* === 9. GALERI: LIGHTBOX GESER === */
+.gal img{cursor:zoom-in}
+#lb{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(26,18,42,.95);visibility:hidden;opacity:0;transition:opacity .25s ease,visibility .25s;touch-action:none;overscroll-behavior:contain}
+#lb.on{visibility:visible;opacity:1}
+#lbImg{max-width:92vw;max-height:78vh;width:auto;height:auto;object-fit:contain;border-radius:14px;border:4px solid #fff;box-shadow:0 20px 60px rgba(0,0,0,.5);user-select:none;-webkit-user-drag:none;will-change:transform,opacity}
+.lb-x,.lb-n{position:absolute;border:0;color:#fff;background:rgba(255,255,255,.14);cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.lb-x{top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:42px;height:42px;font-size:1.1rem}
+.lb-n{top:50%;margin-top:-22px;width:44px;height:44px;font-size:1.7rem;line-height:1;padding-bottom:3px}
+.lb-p{left:8px}.lb-nx{right:8px}
+.lb-c{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;color:rgba(255,255,255,.85);font-size:.85rem;letter-spacing:3px}
 </style>
 </head>
 <body class="locked">
@@ -595,9 +625,9 @@ function loadPetals(){ if(petImgs.length||typeof PET==='undefined')return; petIm
 const mk=(init)=>{const k=Math.floor(Math.random()*34);return {k,x:Math.random()*innerWidth,y:init?Math.random()*innerHeight:-30,w:(innerWidth<500?15:20)+Math.random()*(innerWidth<500?15:20),v:Math.random()*.9+.45,dx:Math.random()*.8-.4,r:Math.random()*6.3,vr:(Math.random()-.5)*.03,t:Math.random()*6.3,vt:.015+Math.random()*.03,o:Math.random()*.35+.6}};
 const pt=Array.from({length:innerWidth<500?10:18},()=>mk(true));
 const bp=[]; /* semburan kelopak saat pintu gerbang terbuka */
-function burstPetals(){
+function burstPetals(bx,by){
   loadPetals();
-  const n=innerWidth<500?32:48, cx0=cv.width/2, cy0=Math.min(innerHeight,cv.height)*.52;
+  const n=innerWidth<500?32:48, cx0=(bx==null?cv.width/2:bx), cy0=(by==null?Math.min(innerHeight,cv.height)*.52:by);
   for(let i=0;i<n;i++){
     const ang=Math.random()*Math.PI*2, sp=Math.random()*9+3;
     bp.push({k:Math.floor(Math.random()*34),x:cx0+(Math.random()-.5)*40,y:cy0+(Math.random()-.5)*80,vx:Math.cos(ang)*sp*1.25,vy:Math.sin(ang)*sp*.75-3,
@@ -892,6 +922,100 @@ void (() => {
 /* nama tamu dari link: ?to=Nama */
 const g=new URLSearchParams(location.search).get('to');
 if(g){wName.value=g;document.getElementById('guestName').textContent='Kepada Yth. '+g}
+
+/* === 6. Perayaan saat ucapan terkirim: hanya memantau tombol, kode pengiriman ke Google Sheets TIDAK diubah === */
+(function(){const btn=document.getElementById('wishBtn');if(!btn)return;
+  const note=document.createElement('p');note.id='wishThanks';note.setAttribute('aria-live','polite');
+  note.textContent='Terima kasih, ucapanmu sudah kami terima 💜';
+  (btn.closest('.form')||btn.parentNode).appendChild(note);
+  let busy=false;
+  new MutationObserver(()=>{ if(!busy&&btn.textContent.trim().indexOf('✔')===0){ busy=true;
+      const r=btn.getBoundingClientRect(); try{burstPetals(r.left+r.width/2,r.top+r.height/2)}catch(e){}
+      note.classList.add('on'); setTimeout(()=>note.classList.remove('on'),5200); setTimeout(()=>{busy=false},4000) } })
+    .observe(btn,{childList:true,characterData:true,subtree:true});
+})();
+
+/* === 8. Simpan ke Kalender (.ics + tautan Google Kalender) ===
+   UBAH DI SINI kalau jam/tempat berubah. Waktu ditulis dalam UTC: WIB = UTC+7 (jam 09:00 WIB = 02:00Z). */
+(function(){
+  const COUPLE='Meidiana & Ferri';
+  const PLACE='Jaya 7, Cengkareng Barat, Jakarta Barat';
+  const MAPS='https://maps.app.goo.gl/buZCBfnp3coWSNbeA';
+  const EVENTS=[ /* urutannya sama dengan kartu di halaman: kartu 1 = Akad, kartu 2 = Resepsi */
+    {title:'Akad Nikah '+COUPLE,         start:'20261219T020000Z', end:'20261219T030000Z', id:'akad'},     /* 09:00-10:00 WIB */
+    {title:'Resepsi Pernikahan '+COUPLE, start:'20261219T030000Z', end:'20261219T120000Z', id:'resepsi'}  /* 10:00-19:00 WIB */
+  ];
+  const cards=[...document.querySelectorAll('#events .ev')];
+  const esc=t=>String(t).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+  const fold=l=>{let o='';while(l.length>73){o+=l.slice(0,73)+'\r\n ';l=l.slice(73)}return o+l};
+  const stamp=()=>new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const desc=e=>'Undangan pernikahan '+COUPLE+'. Lokasi di Google Maps: '+MAPS;
+  function ics(e){
+    const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//'+COUPLE+'//Undangan//ID','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+      'BEGIN:VEVENT','UID:'+e.id+'-'+e.start+'@undangan','DTSTAMP:'+stamp(),'DTSTART:'+e.start,'DTEND:'+e.end,
+      'SUMMARY:'+esc(e.title),'LOCATION:'+esc(PLACE),'DESCRIPTION:'+esc(desc(e)),
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:Besok: '+esc(e.title),'END:VALARM',
+      'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:2 jam lagi: '+esc(e.title),'END:VALARM',
+      'END:VEVENT','END:VCALENDAR'];
+    return L.map(fold).join('\r\n')+'\r\n';
+  }
+  function save(e){
+    const blob=new Blob([ics(e)],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download=e.id+'-meidiana-ferri.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+  }
+  const gcal=e=>'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.title)+'&dates='+e.start+'/'+e.end+
+    '&details='+encodeURIComponent(desc(e))+'&location='+encodeURIComponent(PLACE);
+  cards.forEach((card,k)=>{const e=EVENTS[k];if(!e)return;
+    const box=document.createElement('div');box.className='evcal';
+    const b=document.createElement('button');b.type='button';b.textContent='📅 SIMPAN KE KALENDER';b.addEventListener('click',()=>save(e));
+    const g=document.createElement('a');g.href=gcal(e);g.target='_blank';g.rel='noopener';g.textContent='atau buka di Google Kalender';
+    box.append(b,g);card.appendChild(box);
+  });
+})();
+
+/* === GALERI Our Moments: semua foto tetap tampil; bar ‹ 1 2 3 4 5 6 › langsung memperbesar foto (lightbox) === */
+(function(){const grid=document.querySelector('#gallery .gal');if(!grid)return;
+  const imgs=[...grid.querySelectorAll('img')];if(imgs.length<2)return;
+  const N=imgs.length; let cur=0;
+  const nav=document.createElement('nav');nav.className='gpager';nav.setAttribute('aria-label','Perbesar foto');
+  const prev=document.createElement('button');prev.type='button';prev.className='gp-a';prev.setAttribute('aria-label','Foto sebelumnya');prev.textContent='‹';
+  const next=document.createElement('button');next.type='button';next.className='gp-a';next.setAttribute('aria-label','Foto berikutnya');next.textContent='›';
+  const nums=document.createElement('span');nums.className='gp-n';
+  const nb=[];for(let k=0;k<N;k++){const b=document.createElement('button');b.type='button';b.textContent=String(k+1);b.setAttribute('aria-label','Perbesar foto '+(k+1));b.addEventListener('click',()=>open(k));nums.appendChild(b);nb.push(b)}
+  nav.append(prev,nums,next);grid.insertAdjacentElement('afterend',nav);
+  function mark(k){cur=Math.max(0,Math.min(N-1,k));nb.forEach((b,i)=>{if(i===cur)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current')});prev.disabled=cur===0;next.disabled=cur===N-1}
+  function open(k){mark(k);if(window.__lbOpen)window.__lbOpen(cur)}
+  prev.addEventListener('click',()=>open(cur-1));next.addEventListener('click',()=>open(cur+1));
+  window.__galSync=k=>mark(k);   /* dipanggil lightbox tiap foto berganti */
+  mark(0);
+})();
+
+/* === 9. Lightbox galeri: ketuk foto, geser kiri/kanan, tombol panah, Esc === */
+(function(){const imgs=[...document.querySelectorAll('.gal img')];if(!imgs.length)return;
+  const lb=document.createElement('div');lb.id='lb';lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');lb.setAttribute('aria-label','Galeri foto');
+  lb.innerHTML='<button class="lb-x" aria-label="Tutup">✕</button><button class="lb-n lb-p" aria-label="Sebelumnya">‹</button><img id="lbImg" alt=""><button class="lb-n lb-nx" aria-label="Berikutnya">›</button><div class="lb-c"></div>';
+  document.body.appendChild(lb);
+  const im=lb.querySelector('#lbImg'),cnt=lb.querySelector('.lb-c');let i=0,isOpen=false,sx=0,dx=0,drag=false,moved=false;
+  const src=k=>imgs[k].currentSrc||imgs[k].src;
+  function show(k,dir){i=(k+imgs.length)%imgs.length;im.style.transition='none';im.style.opacity='0';im.style.transform='translateX('+(dir*36)+'px)';
+    im.src=src(i);im.alt=imgs[i].alt||'';cnt.textContent=(i+1)+' / '+imgs.length;if(window.__galSync)window.__galSync(i);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{im.style.transition='opacity .28s ease,transform .28s ease';im.style.opacity='1';im.style.transform='none'}));
+    [1,-1].forEach(d=>{const n=new Image();n.src=src((i+d+imgs.length)%imgs.length)})}
+  function openLb(k){isOpen=true;lb.classList.add('on');document.documentElement.style.overflow='hidden';show(k,0)}
+  function closeLb(){isOpen=false;lb.classList.remove('on');document.documentElement.style.overflow=''}
+  imgs.forEach((g,k)=>g.addEventListener('click',()=>openLb(k)));
+  window.__lbOpen=openLb;
+  lb.querySelector('.lb-x').addEventListener('click',closeLb);
+  lb.querySelector('.lb-p').addEventListener('click',e=>{e.stopPropagation();show(i-1,-1)});
+  lb.querySelector('.lb-nx').addEventListener('click',e=>{e.stopPropagation();show(i+1,1)});
+  lb.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag=true;moved=false;sx=e.clientX;dx=0});
+  lb.addEventListener('pointermove',e=>{if(!drag)return;dx=e.clientX-sx;if(Math.abs(dx)>8)moved=true;if(moved){im.style.transition='none';im.style.transform='translateX('+(dx*.6)+'px)'}});
+  const end=()=>{if(!drag)return;drag=false;
+    if(Math.abs(dx)>50){show(i+(dx<0?1:-1),dx<0?1:-1)}
+    else{im.style.transition='transform .25s ease';im.style.transform='none';if(!moved)closeLb()}};
+  lb.addEventListener('pointerup',end);lb.addEventListener('pointercancel',()=>{drag=false;im.style.transition='transform .25s ease';im.style.transform='none'});
+  addEventListener('keydown',e=>{if(!isOpen)return;if(e.key==='Escape')closeLb();else if(e.key==='ArrowRight')show(i+1,1);else if(e.key==='ArrowLeft')show(i-1,-1)});
+})();
 </script>
 </body>
 </html>
